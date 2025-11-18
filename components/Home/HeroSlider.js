@@ -8,7 +8,7 @@ const slides = [
     id: 1,
     title: "Premium Comfort Furniture",
     subtitle: "Discover our exclusive collection of durable furniture",
-    image: "/images/hero-1.jpg",
+    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
     cta: "Shop Now",
     link: "/products"
   },
@@ -16,7 +16,7 @@ const slides = [
     id: 2,
     title: "Luxury Bedding Collection",
     subtitle: "Transform your bedroom with our premium bedding",
-    image: "/images/hero-2.jpg",
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
     cta: "Explore Bedding",
     link: "/products?category=bedding"
   },
@@ -24,7 +24,7 @@ const slides = [
     id: 3,
     title: "Summer Sale - Up to 50% Off",
     subtitle: "Limited time offers on selected items",
-    image: "/images/hero-3.jpg",
+    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2058&q=80",
     cta: "View Deals",
     link: "/products?sale=true"
   }

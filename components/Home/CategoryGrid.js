@@ -1,72 +1,79 @@
 import Link from 'next/link'
-
-const categories = [
-  {
-    id: 1,
-    name: 'Sofas',
-    description: 'Comfortable seating for your living room',
-    image: '/images/category-sofas.jpg',
-    link: '/products?category=sofas'
-  },
-  {
-    id: 2,
-    name: 'Beds',
-    description: 'Luxurious beds for perfect sleep',
-    image: '/images/category-beds.jpg',
-    link: '/products?category=beds'
-  },
-  {
-    id: 3,
-    name: 'Bedding',
-    description: 'Premium quality bedding sets',
-    image: '/images/category-bedding.jpg',
-    link: '/products?category=bedding'
-  },
-  {
-    id: 4,
-    name: 'Dining',
-    description: 'Elegant dining furniture',
-    image: '/images/category-dining.jpg',
-    link: '/products?category=dining'
-  }
-]
+import Image from 'next/image'
 
 export default function CategoryGrid() {
-  return (
-    <section className="py-16 bg-neutral-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-neutral-900 mb-4">
-            Shop by Category
-          </h2>
-          <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
-            Discover our carefully curated collections designed to bring comfort and style to every room in your home.
-          </p>
-        </div>
+  const categories = [
+    {
+      id: 1,
+      name: "Living Room",
+      description: "Sofas, chairs & coffee tables",
+      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+      link: "/products?category=living-room",
+      items: "120+ products"
+    },
+    {
+      id: 2,
+      name: "Bedroom",
+      description: "Beds, mattresses & wardrobes",
+      image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+      link: "/products?category=bedroom",
+      items: "85+ products"
+    },
+    {
+      id: 3,
+      name: "Dining Room",
+      description: "Tables, chairs & storage",
+      image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+      link: "/products?category=dining",
+      items: "65+ products"
+    },
+    {
+      id: 4,
+      name: "Office",
+      description: "Desks, chairs & cabinets",
+      image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+      link: "/products?category=office",
+      items: "45+ products"
+    }
+  ]
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={category.link}
-              className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-105"
-            >
-              <div
-                className="h-64 bg-cover bg-center"
-                style={{ backgroundImage: `url(${category.image})` }}
-              >
-                <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-30 transition duration-300"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
-                    <p className="text-sm opacity-90">{category.description}</p>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+  return (
+    <div>
+      <div className="text-center mb-12">
+        <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          Shop by Category
+        </h2>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Explore our wide range of furniture categories to find the perfect pieces for your home
+        </p>
       </div>
-    </section>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {categories.map((category) => (
+          <Link
+            key={category.id}
+            href={category.link}
+            className="group block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
+          >
+            <div className="aspect-square relative overflow-hidden">
+              <Image
+                src={category.image}
+                alt={category.name}
+                fill
+                className="object-cover group-hover:scale-105 transition duration-300"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition duration-300"></div>
+            </div>
+            <div className="p-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+                {category.name}
+              </h3>
+              <p className="text-gray-600 mb-2">{category.description}</p>
+              <p className="text-sm text-primary-600 font-medium">{category.items}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
   )
 }

@@ -3,10 +3,10 @@ import { useState } from 'react'
 
 const materials = ['Wood', 'Metal', 'Fabric', 'Leather', 'Velvet', 'Linen']
 const priceRanges = [
-  { label: 'Under $100', value: [0, 100] },
-  { label: '$100 - $500', value: [100, 500] },
-  { label: '$500 - $1000', value: [500, 1000] },
-  { label: 'Over $1000', value: [1000, 5000] },
+  { label: 'Under R100', value: [0, 100] },
+  { label: 'R100 - R500', value: [100, 500] },
+  { label: 'R500 - R1000', value: [500, 1000] },
+  { label: 'Over R1000', value: [1000, 5000] },
 ]
 
 export default function ProductFilters({ filters, setFilters, categories }) {
@@ -49,7 +49,7 @@ export default function ProductFilters({ filters, setFilters, categories }) {
       </div>
 
       {/* Filter Content */}
-      <div className={`${isMobileFiltersOpen ? 'block' : 'hidden'} lg:block space-y-6`}>
+      <div className={`R{isMobileFiltersOpen ? 'block' : 'hidden'} lg:block space-y-6`}>
         {/* Categories */}
         <div>
           <h4 className="font-semibold mb-3">Categories</h4>
