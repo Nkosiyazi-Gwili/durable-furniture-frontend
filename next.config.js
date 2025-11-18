@@ -1,25 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
   images: {
-    domains: ['images.unsplash.com', 'localhost', 'your-vercel-app.vercel.app'],
-    unoptimized: true // For static exports if needed
+    domains: ['images.unsplash.com'],
   },
- env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
-  },
-  // Add this for path aliases
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': require('path').resolve(__dirname),
-    }
-    return config
-  },
-  trailingSlash: true,
-  output: 'standalone'
+  // Remove experimental.appDir for Next.js 13.4+
+  // Remove webpack config for path aliases (use jsconfig.json instead)
+  // Remove output: 'standalone' unless you need it
+  // Remove trailingSlash: true unless specifically needed
 }
 
 module.exports = nextConfig
