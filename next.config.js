@@ -4,7 +4,7 @@ const nextConfig = {
     appDir: true,
   },
   images: {
-    domains: ['localhost', 'your-vercel-app.vercel.app'],
+    domains: ['images.unsplash.com', 'localhost', 'your-vercel-app.vercel.app'],
     unoptimized: true // For static exports if needed
   },
  env: {
