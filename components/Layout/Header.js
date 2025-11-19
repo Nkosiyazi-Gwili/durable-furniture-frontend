@@ -39,8 +39,8 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-lg mx-8">
+          {/* Search Bar - Desktop - Centered */}
+          <div className="hidden md:flex flex-1 max-w-lg mx-8 justify-center">
             <div className="relative w-full">
               <input
                 type="text"
@@ -66,20 +66,23 @@ export default function Header() {
                   <span className="hidden sm:block">{user.name}</span>
                 </button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <Link 
-                    href="/dashboard" 
-                    className="block px-4 py-2 hover:bg-neutral-50"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    My Dashboard
-                  </Link>
+                  {/* Customer goes to /customer, Admin goes to /admin */}
+                  {user.role === 'customer' && (
+                    <Link 
+                      href="/customer" 
+                      className="block px-4 py-2 hover:bg-neutral-50"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Customer Portal
+                    </Link>
+                  )}
                   {user.role === 'admin' && (
                     <Link 
                       href="/admin" 
                       className="block px-4 py-2 hover:bg-neutral-50"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Admin Panel
+                      Admin Portal
                     </Link>
                   )}
                   <button
@@ -125,54 +128,55 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Navigation Menu */}
+        {/* Navigation Menu - Centered underneath search */}
         <nav className={`${isMenuOpen ? 'block' : 'hidden'} md:block border-t border-neutral-200 md:border-t-0 py-4 md:py-0`}>
-          <div className="flex flex-col md:flex-row md:items-center md:space-x-8 space-y-4 md:space-y-0">
+          {/* Centered Navigation Links */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-center md:space-x-8 space-y-4 md:space-y-0">
             <Link 
               href="/" 
-              className="hover:text-primary-500 transition duration-200"
+              className="hover:text-primary-500 transition duration-200 text-center md:text-left"
               onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
             <Link 
               href="/products" 
-              className="hover:text-primary-500 transition duration-200"
+              className="hover:text-primary-500 transition duration-200 text-center md:text-left"
               onClick={() => setIsMenuOpen(false)}
             >
               All Products
             </Link>
             <Link 
               href="/products?category=beds" 
-              className="hover:text-primary-500 transition duration-200"
+              className="hover:text-primary-500 transition duration-200 text-center md:text-left"
               onClick={() => setIsMenuOpen(false)}
             >
               Beds
             </Link>
             <Link 
               href="/products?category=sofas" 
-              className="hover:text-primary-500 transition duration-200"
+              className="hover:text-primary-500 transition duration-200 text-center md:text-left"
               onClick={() => setIsMenuOpen(false)}
             >
               Couches
             </Link>
             <Link 
               href="/products?category=bedding" 
-              className="hover:text-primary-500 transition duration-200"
+              className="hover:text-primary-500 transition duration-200 text-center md:text-left"
               onClick={() => setIsMenuOpen(false)}
             >
               Bedding
             </Link>
             <Link 
               href="/about" 
-              className="hover:text-primary-500 transition duration-200"
+              className="hover:text-primary-500 transition duration-200 text-center md:text-left"
               onClick={() => setIsMenuOpen(false)}
             >
               About
             </Link>
             <Link 
               href="/contact" 
-              className="hover:text-primary-500 transition duration-200"
+              className="hover:text-primary-500 transition duration-200 text-center md:text-left"
               onClick={() => setIsMenuOpen(false)}
             >
               Contact

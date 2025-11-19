@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { FiMail, FiLock, FiUser } from 'react-icons/fi'
+import Image from 'next/image'
+import { FiMail, FiLock } from 'react-icons/fi'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -22,7 +23,13 @@ export default function LoginPage() {
     const result = await login(email, password)
     
     if (result.success) {
-      router.push('/dashboard')
+      // Redirect based on user role
+      const user = JSON.parse(localStorage.getItem('user'))
+      if (user?.role === 'admin') {
+        router.push('/admin')
+      } else {
+        router.push('/customer')
+      }
     } else {
       setError(result.message)
     }
@@ -33,6 +40,26 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12">
       <div className="max-w-md w-full space-y-8">
+        {/* Logo Section */}
+        <div className="text-center">
+          <Link href="/" className="inline-flex items-center space-x-3">
+            <div className="w-12 h-12 relative">
+              <Image
+                src="/images/logo.jpg"
+                alt="Durable Furniture & Bedding"
+                width={48}
+                height={48}
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div>
+              <div className="text-xl font-bold text-neutral-900">DURABLE</div>
+              <div className="text-xs text-neutral-600 -mt-1">FURNITURE & BEDDING</div>
+            </div>
+          </Link>
+        </div>
+
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold text-neutral-900">
             Sign in to your account
