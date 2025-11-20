@@ -67,11 +67,11 @@ export default function ProductCard({ product }) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-primary-600">
-              ${product.price}
+              R{product.price}
             </span>
             {product.comparePrice && product.comparePrice > product.price && (
               <span className="text-sm text-neutral-500 line-through">
-                ${product.comparePrice}
+                R{product.comparePrice}
               </span>
             )}
           </div>

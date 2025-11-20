@@ -12,7 +12,9 @@ import {
   FiPhone, 
   FiMapPin,
   FiSearch,
-  FiPlus
+  FiPlus,
+  FiX,
+  FiSave
 } from 'react-icons/fi'
 
 export default function UserManagement() {
@@ -22,6 +24,21 @@ export default function UserManagement() {
   const [filteredUsers, setFilteredUsers] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(null)
+  const [roleFilter, setRoleFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+
+  // Form state
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    role: 'customer',
+    status: 'active'
+  })
 
   // Dummy users data
   const dummyUsers = [
@@ -79,39 +96,6 @@ export default function UserManagement() {
       joinDate: '2024-01-02',
       status: 'inactive',
       orders: 8
-    },
-    {
-      _id: '6',
-      name: 'David Brown',
-      email: 'david@example.com',
-      role: 'customer',
-      phone: '+27 79 444 5555',
-      address: 'Port Elizabeth, South Africa',
-      joinDate: '2023-12-28',
-      status: 'active',
-      orders: 15
-    },
-    {
-      _id: '7',
-      name: 'Lisa Anderson',
-      email: 'lisa@example.com',
-      role: 'customer',
-      phone: '+27 76 666 7777',
-      address: 'Bloemfontein, South Africa',
-      joinDate: '2023-12-20',
-      status: 'active',
-      orders: 7
-    },
-    {
-      _id: '8',
-      name: 'Robert Wilson',
-      email: 'robert@example.com',
-      role: 'customer',
-      phone: '+27 83 888 9999',
-      address: 'East London, South Africa',
-      joinDate: '2023-12-15',
-      status: 'inactive',
-      orders: 2
     }
   ]
 
@@ -129,30 +113,166 @@ export default function UserManagement() {
   }, [user, loading, router])
 
   useEffect(() => {
-    const filtered = users.filter(user =>
+    let filtered = users.filter(user =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.role.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    setFilteredUsers(filtered)
-  }, [searchTerm, users])
 
+    if (roleFilter) {
+      filtered = filtered.filter(user => user.role === roleFilter)
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter(user => user.status === statusFilter)
+    }
+
+    setFilteredUsers(filtered)
+  }, [searchTerm, users, roleFilter, statusFilter])
+
+  // Email notification function
+  const sendEmailNotification = async (userEmail, action, details = {}) => {
+    try {
+      // In a real application, you would call your email API here
+      console.log(`Sending email to ${userEmail} for action: ${action}`, details)
+      
+      // Simulate API call
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: userEmail,
+          subject: getEmailSubject(action),
+          template: action,
+          data: details
+        })
+      })
+
+      console.log(`Email sent successfully to ${userEmail}`)
+    } catch (error) {
+      console.error('Failed to send email:', error)
+    }
+  }
+
+  const getEmailSubject = (action) => {
+    const subjects = {
+      create: 'Welcome to Durable Furniture! Your Account Has Been Created',
+      update: 'Your Account Has Been Updated',
+      status_change: 'Account Status Update',
+      delete: 'Account Deletion Confirmation'
+    }
+    return subjects[action] || 'Notification from Durable Furniture'
+  }
+
+  // Add new user
+  const handleAddUser = async (e) => {
+    e.preventDefault()
+    
+    const newUser = {
+      _id: Date.now().toString(),
+      ...formData,
+      joinDate: new Date().toISOString().split('T')[0],
+      orders: 0
+    }
+
+    setUsers([...users, newUser])
+    
+    // Send account creation email
+    await sendEmailNotification(formData.email, 'create', {
+      name: formData.name,
+      role: formData.role,
+      loginUrl: 'https://durablefurniture.com/auth/login'
+    })
+
+    setShowAddModal(false)
+    resetForm()
+  }
+
+  // Edit user
+  const handleEditUser = (user) => {
+    setEditingUser(user)
+    setFormData({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      role: user.role,
+      status: user.status
+    })
+  }
+
+  const handleUpdateUser = async (e) => {
+    e.preventDefault()
+    
+    const updatedUsers = users.map(user => 
+      user._id === editingUser._id 
+        ? { ...user, ...formData }
+        : user
+    )
+
+    setUsers(updatedUsers)
+    
+    // Send update notification email
+    await sendEmailNotification(editingUser.email, 'update', {
+      name: formData.name,
+      changes: Object.keys(formData).filter(key => formData[key] !== editingUser[key])
+    })
+
+    setEditingUser(null)
+    resetForm()
+  }
+
+  // Delete user with confirmation
+  const handleDeleteUser = async (userId) => {
+    const userToDelete = users.find(u => u._id === userId)
+    
+    // Send account deletion email
+    await sendEmailNotification(userToDelete.email, 'delete', {
+      name: userToDelete.name,
+      deletionDate: new Date().toLocaleDateString()
+    })
+
+    setUsers(users.filter(user => user._id !== userId))
+    setShowDeleteModal(null)
+  }
+
+  // Status change with email notification
+  const handleStatusChange = async (userId, newStatus) => {
+    const userToUpdate = users.find(u => u._id === userId)
+    const updatedUsers = users.map(user => 
+      user._id === userId ? { ...user, status: newStatus } : user
+    )
+
+    setUsers(updatedUsers)
+    
+    // Send status change email
+    await sendEmailNotification(userToUpdate.email, 'status_change', {
+      name: userToUpdate.name,
+      newStatus: newStatus,
+      statusMessage: newStatus === 'active' 
+        ? 'Your account has been activated. You can now access all features.'
+        : 'Your account has been deactivated. Please contact support for more information.'
+    })
+  }
+
+  // Role change
   const handleRoleChange = (userId, newRole) => {
     setUsers(users.map(user => 
       user._id === userId ? { ...user, role: newRole } : user
     ))
   }
 
-  const handleStatusChange = (userId, newStatus) => {
-    setUsers(users.map(user => 
-      user._id === userId ? { ...user, status: newStatus } : user
-    ))
-  }
-
-  const handleDeleteUser = (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(user => user._id !== userId))
-    }
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      role: 'customer',
+      status: 'active'
+    })
   }
 
   const getStatusColor = (status) => {
@@ -201,7 +321,10 @@ export default function UserManagement() {
               </div>
             </div>
           </div>
-          <button className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+          >
             <FiPlus className="w-4 h-4" />
             <span>Add User</span>
           </button>
@@ -274,12 +397,20 @@ export default function UserManagement() {
                 className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
-            <select className="px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <select 
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
               <option value="">All Roles</option>
               <option value="admin">Admin</option>
               <option value="customer">Customer</option>
             </select>
-            <select className="px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <select 
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
               <option value="">All Status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -376,12 +507,15 @@ export default function UserManagement() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                        <button className="text-primary-600 hover:text-primary-900">
+                        <button 
+                          onClick={() => handleEditUser(user)}
+                          className="text-primary-600 hover:text-primary-900 p-1"
+                        >
                           <FiEdit className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => handleDeleteUser(user._id)}
-                          className="text-red-600 hover:text-red-900"
+                          onClick={() => setShowDeleteModal(user._id)}
+                          className="text-red-600 hover:text-red-900 p-1"
                         >
                           <FiTrash2 className="w-4 h-4" />
                         </button>
@@ -407,6 +541,276 @@ export default function UserManagement() {
               <p className="text-neutral-600 mb-6">
                 Try adjusting your search criteria or add new users.
               </p>
+              <button 
+                onClick={() => setShowAddModal(true)}
+                className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-lg"
+              >
+                Add New User
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Add User Modal */}
+        {showAddModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-md w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Add New User</h3>
+                <button 
+                  onClick={() => {
+                    setShowAddModal(false)
+                    resetForm()
+                  }}
+                  className="text-neutral-500 hover:text-neutral-700"
+                >
+                  <FiX className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleAddUser} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                    className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Role
+                    </label>
+                    <select
+                      value={formData.role}
+                      onChange={(e) => setFormData({...formData, role: e.target.value})}
+                      className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      <option value="customer">Customer</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Status
+                    </label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({...formData, status: e.target.value})}
+                      className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddModal(false)
+                      resetForm()
+                    }}
+                    className="px-4 py-2 text-neutral-600 hover:text-neutral-800"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                  >
+                    <FiSave className="w-4 h-4" />
+                    <span>Add User</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit User Modal */}
+        {editingUser && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-md w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Edit User</h3>
+                <button 
+                  onClick={() => {
+                    setEditingUser(null)
+                    resetForm()
+                  }}
+                  className="text-neutral-500 hover:text-neutral-700"
+                >
+                  <FiX className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleUpdateUser} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                    className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Role
+                    </label>
+                    <select
+                      value={formData.role}
+                      onChange={(e) => setFormData({...formData, role: e.target.value})}
+                      className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      <option value="customer">Customer</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Status
+                    </label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({...formData, status: e.target.value})}
+                      className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingUser(null)
+                      resetForm()
+                    }}
+                    className="px-4 py-2 text-neutral-600 hover:text-neutral-800"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                  >
+                    <FiSave className="w-4 h-4" />
+                    <span>Update User</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-md w-full p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <FiTrash2 className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">Delete User</h3>
+                  <p className="text-neutral-600">This action cannot be undone.</p>
+                </div>
+              </div>
+              <p className="text-neutral-700 mb-6">
+                Are you sure you want to delete this user? All their data will be permanently removed.
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteModal(null)}
+                  className="px-4 py-2 text-neutral-600 hover:text-neutral-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDeleteUser(showDeleteModal)}
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+                >
+                  Delete User
+                </button>
+              </div>
             </div>
           </div>
         )}
