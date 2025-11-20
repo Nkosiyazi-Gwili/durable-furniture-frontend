@@ -69,7 +69,7 @@ export default function Header() {
                   {/* Customer goes to /customer, Admin goes to /admin */}
                   {user.role === 'customer' && (
                     <Link 
-                      href="/customer" 
+                      href="/dashboard" 
                       className="block px-4 py-2 hover:bg-neutral-50"
                       onClick={() => setIsMenuOpen(false)}
                     >

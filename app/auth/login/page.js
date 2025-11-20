@@ -28,7 +28,7 @@ export default function LoginPage() {
       if (user?.role === 'admin') {
         router.push('/admin')
       } else {
-        router.push('/customer')
+        router.push('/dashboard')
       }
     } else {
       setError(result.message)

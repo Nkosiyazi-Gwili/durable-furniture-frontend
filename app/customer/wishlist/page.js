@@ -75,7 +75,7 @@ export default function WishlistPage() {
     <div className="min-h-screen bg-neutral-50 py-8">
       <div className="container mx-auto px-4">
         <div className="mb-6">
-          <Link href="/customer" className="text-primary-600 hover:text-primary-700 mb-4 inline-block">
+          <Link href="/dashboard" className="text-primary-600 hover:text-primary-700 mb-4 inline-block">
             ← Back to Dashboard
           </Link>
           <h1 className="text-3xl font-bold text-neutral-900">My Wishlist</h1>
